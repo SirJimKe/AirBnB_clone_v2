@@ -20,8 +20,7 @@ def do_deploy(archive_path):
         folder_name = archive_filename.replace('.tgz', '')
 
         run('mkdir -p /data/web_static/releases/{}/'.format(folder_name))
-        run('tar -xzf /tmp/{} -C /data/web_static/releases/{}/'
-            .format(archive_filename, folder_name))
+        run('tar -xzf /tmp/{} -C /data/web_static/releases/{}/'.format(archive_filename, folder_name))
 
         run('rm /tmp/{}'.format(archive_filename))
 
@@ -29,12 +28,9 @@ def do_deploy(archive_path):
 
         run('rm -rf /data/web_static/current')
 
-        run('ln -s /data/web_static/releases/{}/ /data/web_static/current'
-            .format(folder_name))
+        run('ln -s /data/web_static/releases/{}/ /data/web_static/current'.format(folder_name))
 
-        print("New version deployed!")
         return True
 
     except Exception as e:
-        print(e)
         return False
