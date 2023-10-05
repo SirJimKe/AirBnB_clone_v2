@@ -1,15 +1,40 @@
 #!/usr/bin/python3
 """
-Fabric script that distributes an archive to your web servers
+Distributes an archive to your web servers using the function do_deploy
 """
-from datetime import datetime
-from fabric.api import *
+
+from fabric.api import env, run, put
 import os
 
-env.host = ["54.208.47.42", "35.175.64.254"]
-env.user = "ubuntu"
+env.hosts = ['<USER>@<WEB_SERVER_01_IP>', '<USER>@<WEB_SERVER_02_IP>']
 
-def do_pack():
-    """
-        return the archive path if archive has generated correctly.
-    """
+def do_deploy(archive_path):
+    """Deploys the archive to the web servers"""
+    if not os.path.exists(archive_path):
+        return False
+
+    try:
+        put(archive_path, '/tmp/')
+
+        archive_filename = os.path.basename(archive_path)
+        folder_name = archive_filename.replace('.tgz', '')
+
+        run('mkdir -p /data/web_static/releases/{}/'.format(folder_name))
+        run('tar -xzf /tmp/{} -C /data/web_static/releases/{}/'
+            .format(archive_filename, folder_name))
+
+        run('rm /tmp/{}'.format(archive_filename))
+
+        run('mv /data/web_static/releases/{}/web_static/* /data/web_static/releases/{}/'.format(folder_name, folder_name))
+
+        run('rm -rf /data/web_static/current')
+
+        run('ln -s /data/web_static/releases/{}/ /data/web_static/current'
+            .format(folder_name))
+
+        print("New version deployed!")
+        return True
+
+    except Exception as e:
+        print(e)
+        return False
