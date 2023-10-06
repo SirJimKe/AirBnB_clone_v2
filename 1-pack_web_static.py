@@ -6,16 +6,22 @@ from datetime import datetime
 import os
 
 def do_pack():
-    """Packs the contents of the web_static folder into a .tgz archive."""
-    if not os.path.exists("versions"):
-        os.makedirs("versions")
+    """Creates a .tgz archive from the contents of the web_static folder."""
+    try:
+        if not os.path.exists("versions"):
+            os.makedirs("versions")
 
-    now = datetime.utcnow()
-    archive_name = "web_static_{}{}{}{}{}{}.tgz".format(now.year, now.month,
-                                                       now.day, now.hour,
-                                                       now.minute, now.second)
+        timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
+        archive_name = "web_static_{}.tgz".format(timestamp)
 
-    local("tar -cvzf versions/{} web_static".format(archive_name))
+        local("tar -cvzf versions/{} web_static".format(archive_name))
 
-    archive_path = "versions/{}".format(archive_name)
-    return archive_path if os.path.exists(archive_path) else None
+        archive_path = "versions/{}".format(archive_name)
+        if os.path.exists(archive_path):
+            return archive_path
+        else:
+            return None
+
+    except Exception as e:
+        print("An error occurred: {}".format(e))
+        return None
